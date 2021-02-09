@@ -15,6 +15,7 @@ void connection::start() {
         return;
     } else {
         std::cout << "Successfull handshake with client" << std::endl;
+        _socket.lowest_layer().non_blocking(true); // Set it here, so it works...
     }
 
     read();

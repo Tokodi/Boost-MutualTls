@@ -28,15 +28,7 @@ void server::initializeTls() {
         return;
     }
 
-    // TODO: example does not use this
-    //_sslContext.load_verify_file("../certs/ca.pem", error);
-    //if (error) {
-    //    std::cout << "Could not load CA cert file (" << error.message() << ")" << std::endl;
-    //    return;
-    //}
-
-    // TODO: in stream terminator use_certificate_file is used ????
-    _sslContext.use_certificate_chain_file("../certs/server.crt", error);
+    _sslContext.use_certificate_file("../certs/server.crt", boost::asio::ssl::context::pem, error);
     if (error) {
         std::cout << "Could not set certificate file (" << error.message() << ")" << std::endl;
         return;
@@ -47,14 +39,6 @@ void server::initializeTls() {
         std::cout << "Could not set private key (" << error.message() << ")" << std::endl;
         return;
     }
-
-    // TODO: example does not use this
-    //_sslSocket.set_verify_mode(boost::asio::ssl::verify_peer, error);
-    //if (error) {
-    //    std::cout << "Could not set verify mode (" << error.message() << ")" << std::endl;
-    //    return;
-    //}
-
 }
 
 void server::accept() {
@@ -62,7 +46,7 @@ void server::accept() {
         [this](const boost::system::error_code& error, boost::asio::ip::tcp::socket socket) {
             if (!error) {
                 std::cout << "Client connected (" << socket.remote_endpoint() << ")" << std::endl;
-                //socket.non_blocking(true);
+                //socket.non_blocking(true); // If set here, handshake fails with "resource temporarly unavailable"
                 std::make_shared<connection>(std::move(socket), _sslContext)->start();
             }
             accept();
@@ -71,5 +55,5 @@ void server::accept() {
 }
 
 std::string server::getPassword() const {
-    return "test"; // TODO: is this even used?
+    return "asdfasdf"; // TODO: is this even used? Does not seems like it...
 }

@@ -26,12 +26,16 @@ void client::connect() {
         return;
     }
 
+    _isConnected = true;
     std::cout << "Successfully connected to server" << std::endl;
 }
 
 void client::send(const char* message, std::size_t messageLength) {
+    if (!_isConnected)
+        return;
+
     boost::system::error_code error;
-    boost::asio::write(_sslSocket, boost::asio::buffer(message, messageLength)); // TODO: This might be a probelm...
+    boost::asio::write(_sslSocket, boost::asio::buffer(message, messageLength));
     if (error) {
         std::cout << "Could not write message to stream (" << error.message() << ")" << std::endl;
         return;
@@ -53,7 +57,6 @@ void client::initializeTls() {
         return;
     }
 
-    // TODO: in stream terminator it is set on context ?????
     _sslSocket.set_verify_mode(boost::asio::ssl::verify_peer, error);
     if (error) {
         std::cout << "Could not set verify mode (" << error.message() << ")" << std::endl;
