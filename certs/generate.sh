@@ -1,5 +1,5 @@
 # Create our CA key and cert to self sign certs with          // Clients get this certificate (ca.crt) to check if the server cert is signed with this
-openssl req -new -x509 -keyout ca.key -out ca.crt -days 30 -passin "pass:test" -passout "pass:test" <<EOF
+openssl req -new -x509 -keyout ca.key -out ca.pem -days 30 -passin "pass:test" -passout "pass:test" <<EOF
 CA
 TestCA
 TestCityCA
