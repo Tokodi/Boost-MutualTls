@@ -28,4 +28,4 @@ testSV@mail.com
 EOF
 
 # Create servers certificate by signing it with CA key
-openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 30 -sha256 -passin "pass:test"
+openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out server.crt -days 30 -sha256 -passin "pass:test"
