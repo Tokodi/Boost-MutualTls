@@ -12,10 +12,10 @@ testCA@mail.com
 EOF
 
 # Generate server private key
-openssl genrsa -out server.key 2048
+openssl genrsa -out server.key -aes128 -passout pass:test 2048
 
 # Create Certificate Signing Requests for server's private key
-openssl req -key server.key -new -out server.csr <<EOF
+openssl req -key server.key -new -out server.csr -passin "pass:test" <<EOF
 SV
 TestSV
 TestCitySV

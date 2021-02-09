@@ -55,5 +55,5 @@ void server::accept() {
 }
 
 std::string server::getPassword() const {
-    return "asdfasdf"; // TODO: is this even used? Does not seems like it...
+    return "test";
 }
