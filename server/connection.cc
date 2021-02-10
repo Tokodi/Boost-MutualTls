@@ -18,7 +18,7 @@ void connection::start() {
     } else {
         std::cout << "[Connection] ("
                   << _socket.lowest_layer().remote_endpoint()
-                  << ") Successfull handshake with client" << std::endl;
+                  << ") Successful handshake with client" << std::endl;
         _socket.lowest_layer().non_blocking(true); // NOTE: Set it here, so it works...
     }
 

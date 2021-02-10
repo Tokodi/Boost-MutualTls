@@ -80,7 +80,7 @@ void server::accept() {
 }
 
 std::string server::getPassword() const {
-    return "test";
+    return "serverKeyPass";
 }
 
 bool server::verifyCertificate(bool preverified, boost::asio::ssl::verify_context& ctx) {
@@ -94,11 +94,11 @@ bool server::verifyCertificate(bool preverified, boost::asio::ssl::verify_contex
     char subjectName[256];
     X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
     X509_NAME_oneline(X509_get_subject_name(cert), subjectName, 256);
-    std::cout << "Verifying " << subjectName << std::endl;
+    std::cout << "[Server] Verifying " << subjectName << std::endl;
     if (preverified)
-        std::cout << "Verified!" << std::endl;
+        std::cout << "[Server] Verified!" << std::endl;
     else
-        std::cout << "Verification failed!" << std::endl;
+        std::cout << "[Server] Verification failed!" << std::endl;
 
     return preverified;
 }

@@ -10,8 +10,10 @@ class client {
     void send(const char* message, std::size_t messageLength);
 
   private:
-    void connect();
     void initializeTls();
+    void connect();
+
+    std::string getPassword() const;
     bool verifyCertificate(bool preverified, boost::asio::ssl::verify_context& ctx);
 
   private:

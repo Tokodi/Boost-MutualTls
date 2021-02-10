@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     try {
         myClient = std::make_unique<client>(std::string(argv[1]), atoi(argv[2]));
     } catch (...) {
-        std::cout << "Could not initialize client" << std::endl;
+        std::cout << "[Main] Could not initialize client" << std::endl;
         return -1;
     }
 
