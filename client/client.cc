@@ -50,23 +50,24 @@ void client::initializeTls() try {
         throw;
     }
 
+    _sslContext.set_verify_mode(boost::asio::ssl::verify_peer, error);
+    if (error) {
+        std::cout << "Could not set verify mode (" << error.message() << ")" << std::endl;
+        throw;
+    }
+
+    _sslContext.set_verify_callback(std::bind(&client::verifyCertificate, this, std::placeholders::_1, std::placeholders::_2), error);
+    if (error) {
+        std::cout << "Could not set verify callback function (" << error.message() << ")" << std::endl;
+        throw;
+    }
+
     _sslContext.load_verify_file("../certs/ca.pem", error);
     if (error) {
         std::cout << "Could not load CA cert file (" << error.message() << ")" << std::endl;
         throw;
     }
 
-    _sslSocket.set_verify_mode(boost::asio::ssl::verify_peer, error);
-    if (error) {
-        std::cout << "Could not set verify mode (" << error.message() << ")" << std::endl;
-        throw;
-    }
-
-    _sslSocket.set_verify_callback(std::bind(&client::verifyCertificate, this, std::placeholders::_1, std::placeholders::_2), error);
-    if (error) {
-        std::cout << "Could not set verify callback function (" << error.message() << ")" << std::endl;
-        throw;
-    }
 } catch (...) {
     std::cout << "Tls initialization failed" << std::endl;
     throw;
@@ -84,6 +85,10 @@ bool client::verifyCertificate(bool preverified, boost::asio::ssl::verify_contex
     X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
     X509_NAME_oneline(X509_get_subject_name(cert), subjectName, 256);
     std::cout << "Verifying " << subjectName << std::endl;
+    if (preverified)
+        std::cout << "Verified!" << std::endl;
+    else
+        std::cout << "Verification failed!" << std::endl;
 
     return preverified;
 }

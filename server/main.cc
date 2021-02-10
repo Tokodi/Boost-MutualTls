@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     try {
         myServer = std::make_unique<server>(atoi(argv[1]));
     } catch (...) {
-        std::cout << "Could not initialize server" << std::endl;
+        std::cout << "[Main] Could not initialize server" << std::endl;
         return -1;
     }
 

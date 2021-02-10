@@ -10,11 +10,16 @@ void connection::start() {
 
     _socket.handshake(boost::asio::ssl::stream_base::server, error);
     if (error) {
-        std::cout << "Handshake failed with client (" << error.message() << ")" << std::endl;
+        std::cout << "[Connection] ("
+                  << _socket.lowest_layer().remote_endpoint()
+                  << ") Handshake failed with client ("
+                  << error.message() << ")" << std::endl;
         return;
     } else {
-        std::cout << "Successfull handshake with client" << std::endl;
-        _socket.lowest_layer().non_blocking(true); // Set it here, so it works...
+        std::cout << "[Connection] ("
+                  << _socket.lowest_layer().remote_endpoint()
+                  << ") Successfull handshake with client" << std::endl;
+        _socket.lowest_layer().non_blocking(true); // NOTE: Set it here, so it works...
     }
 
     read();
@@ -29,9 +34,13 @@ void connection::read() {
 
 void connection::onRead(boost::system::error_code error, std::size_t bytesReceived) {
     if (!error) {
-        std::cout << "Read " << bytesReceived << " bytes: " << std::string(_buffer, bytesReceived) << std::endl;
+        std::cout << "[Connection] ("
+                  << _socket.lowest_layer().remote_endpoint()
+                  << ") Read " << bytesReceived << " bytes: " << std::string(_buffer, bytesReceived) << std::endl;
     } else {
-        std::cout << "Read error (" << error.message() << ")" << std::endl;
+        std::cout << "[Connection] ("
+                  << _socket.lowest_layer().remote_endpoint()
+                  << ") Read error (" << error.message() << ")" << std::endl;
     }
     read();
 }
