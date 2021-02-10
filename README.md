@@ -1,4 +1,4 @@
-# BoostTls
+# Boost mTls
 
 Simple example of server-client communication with mutual TLS, implemented in C++ with Boost::Asio::Ssl.
 
