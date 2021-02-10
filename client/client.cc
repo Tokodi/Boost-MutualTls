@@ -12,28 +12,27 @@ client::client(const std::string remoteIp, const std::uint16_t remotePort)
         connect();
 }
 
-void client::connect() {
+void client::connect() try {
     boost::system::error_code error;
     _sslSocket.lowest_layer().connect(_remoteEndpoint, error);
     if (error) {
         std::cout << "Could not connect to remote endpoint (" << error.message() << ")" << std::endl;
-        return;
+        throw;
     }
 
     _sslSocket.handshake(boost::asio::ssl::stream_base::client, error);
     if (error) {
         std::cout << "Handshake failed with server (" << error.message() << ")" << std::endl;
-        return;
+        throw;
     }
 
-    _isConnected = true;
     std::cout << "Successfully connected to server" << std::endl;
+} catch (...) {
+    std::cout << "Could not connect to server" << std::endl;
+    throw;
 }
 
 void client::send(const char* message, std::size_t messageLength) {
-    if (!_isConnected)
-        return;
-
     boost::system::error_code error;
     boost::asio::write(_sslSocket, boost::asio::buffer(message, messageLength));
     if (error) {
@@ -42,32 +41,35 @@ void client::send(const char* message, std::size_t messageLength) {
     }
 }
 
-void client::initializeTls() {
+void client::initializeTls() try {
     boost::system::error_code error;
 
     _sslContext.set_options(boost::asio::ssl::context::default_workarounds, error);
     if (error) {
         std::cout << "Could not set ssl context options (" << error.message() << ")" << std::endl;
-        return;
+        throw;
     }
 
     _sslContext.load_verify_file("../certs/ca.pem", error);
     if (error) {
         std::cout << "Could not load CA cert file (" << error.message() << ")" << std::endl;
-        return;
+        throw;
     }
 
     _sslSocket.set_verify_mode(boost::asio::ssl::verify_peer, error);
     if (error) {
         std::cout << "Could not set verify mode (" << error.message() << ")" << std::endl;
-        return;
+        throw;
     }
 
     _sslSocket.set_verify_callback(std::bind(&client::verifyCertificate, this, std::placeholders::_1, std::placeholders::_2), error);
     if (error) {
         std::cout << "Could not set verify callback function (" << error.message() << ")" << std::endl;
-        return;
+        throw;
     }
+} catch (...) {
+    std::cout << "Tls initialization failed" << std::endl;
+    throw;
 }
 
 bool client::verifyCertificate(bool preverified, boost::asio::ssl::verify_context& ctx) {

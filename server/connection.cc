@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-
 connection::connection(boost::asio::ip::tcp::socket socket, boost::asio::ssl::context& sslContext)
     : _socket(std::move(socket), sslContext) {}
 
@@ -22,13 +21,17 @@ void connection::start() {
 }
 
 void connection::read() {
-    _socket.async_read_some(boost::asio::buffer(_buffer, 1024),
+    _socket.async_read_some(boost::asio::buffer(_buffer, MAX_READ_BYTES),
                       std::bind(&connection::onRead,
                                 std::enable_shared_from_this<connection>::shared_from_this(),
                                 std::placeholders::_1, std::placeholders::_2));
 }
 
 void connection::onRead(boost::system::error_code error, std::size_t bytesReceived) {
-    std::cout << "Read " << bytesReceived << " bytes: " << std::string(_buffer, bytesReceived) << std::endl;
+    if (!error) {
+        std::cout << "Read " << bytesReceived << " bytes: " << std::string(_buffer, bytesReceived) << std::endl;
+    } else {
+        std::cout << "Read error (" << error.message() << ")" << std::endl;
+    }
     read();
 }

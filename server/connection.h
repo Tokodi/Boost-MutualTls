@@ -14,6 +14,9 @@ class connection : public std::enable_shared_from_this<connection> {
     void onRead(boost::system::error_code error, std::size_t bytesReceived);
 
   private:
-    char _buffer[1024];
+    static constexpr std::uint32_t MAX_READ_BYTES = 1024;
+
+    char _buffer[MAX_READ_BYTES];
     boost::asio::ssl::stream<boost::asio::ip::tcp::socket> _socket;
+
 };

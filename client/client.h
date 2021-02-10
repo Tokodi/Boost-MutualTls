@@ -18,8 +18,6 @@ class client {
     const std::string _remoteIp;
     const std::uint16_t _remotePort = UINT16_MAX;
 
-    bool _isConnected = false;
-
     std::uint8_t _request[256];
     std::uint8_t _reply[256];
 

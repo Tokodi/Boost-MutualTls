@@ -13,32 +13,35 @@ server::server(const std::uint16_t port)
         _ioContext.run();
 }
 
-void server::initializeTls() {
+void server::initializeTls() try {
     boost::system::error_code error;
 
     _sslContext.set_options(boost::asio::ssl::context::default_workarounds, error);
     if (error) {
         std::cout << "Could not set ssl context options (" << error.message() << ")" << std::endl;
-        return;
+        throw;
     }
 
     _sslContext.set_password_callback(std::bind(&server::getPassword, this), error);
     if (error) {
         std::cout << "Could not set password callback (" << error.message() << ")" << std::endl;
-        return;
+        throw;
     }
 
     _sslContext.use_certificate_file("../certs/server.crt", boost::asio::ssl::context::pem, error);
     if (error) {
         std::cout << "Could not set certificate file (" << error.message() << ")" << std::endl;
-        return;
+        throw;
     }
 
     _sslContext.use_private_key_file("../certs/server.key", boost::asio::ssl::context::pem, error);
     if (error) {
         std::cout << "Could not set private key (" << error.message() << ")" << std::endl;
-        return;
+        throw;
     }
+} catch (...) {
+    std::cout << "Tls initialization failed" << std::endl;
+    throw;
 }
 
 void server::accept() {
@@ -46,7 +49,7 @@ void server::accept() {
         [this](const boost::system::error_code& error, boost::asio::ip::tcp::socket socket) {
             if (!error) {
                 std::cout << "Client connected (" << socket.remote_endpoint() << ")" << std::endl;
-                //socket.non_blocking(true); // If set here, handshake fails with "resource temporarly unavailable"
+                //socket.non_blocking(true); // NOTE: If set here, handshake fails with "resource temporarly unavailable"
                 std::make_shared<connection>(std::move(socket), _sslContext)->start();
             }
             accept();
