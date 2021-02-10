@@ -17,6 +17,6 @@ class connection : public std::enable_shared_from_this<connection> {
     static constexpr std::uint32_t MAX_READ_BYTES = 1024;
 
     char _buffer[MAX_READ_BYTES];
-    boost::asio::ssl::stream<boost::asio::ip::tcp::socket> _socket;
+    boost::asio::ssl::stream<boost::asio::ip::tcp::socket> _sslSocket;
 
 };

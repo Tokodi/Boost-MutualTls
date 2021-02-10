@@ -17,5 +17,12 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    myServer->start();
+
+    std::string input;
+    std::cin >> input;
+
+    myServer->stop();
+
     return 0;
 }

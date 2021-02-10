@@ -19,5 +19,10 @@ cd certs
 
 ## Dependency
 
-* boost >= 1.66  
+* boost >= 1.66
 * openssl
+
+## TODO
+
+* Add notes to code
+* Update README

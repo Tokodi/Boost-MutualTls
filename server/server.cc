@@ -10,11 +10,21 @@ server::server(const std::uint16_t port)
     , _acceptor(_ioContext, boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v6::any(), port))
     , _sslContext(boost::asio::ssl::context::tlsv12_server) {
         initializeTls();
-        accept();
+}
 
-        std::cout << "[Server] Initialized succesfully. Waiting for connections..." << std::endl;
+void server::start() {
+    std::cout << "[Server] Starting server" << std::endl;
+    accept();
+    _ioContextThread = std::thread([this]() { _ioContext.run(); });
+}
 
-        _ioContext.run(); // NOTE: Calling run() blocks
+void server::stop() {
+    std::cout << "[Server] Terminating server" << std::endl;
+    if (!_ioContext.stopped())
+        _ioContext.stop();
+
+    if (_ioContextThread.joinable())
+        _ioContextThread.join();
 }
 
 void server::initializeTls() try {
@@ -44,6 +54,12 @@ void server::initializeTls() try {
         throw std::runtime_error("TLS Config error");
     }
 
+    _sslContext.load_verify_file("../certs/ca.pem", error);
+    if (error) {
+        std::cout << "[Server] Could not load CA cert file (" << error.message() << ")" << std::endl;
+        throw std::runtime_error("TLS Config error");
+    }
+
     _sslContext.set_verify_mode(boost::asio::ssl::verify_peer | boost::asio::ssl::verify_fail_if_no_peer_cert, error);
     if (error) {
         std::cout << "[Server] Could not set verify mode (" << error.message() << ")" << std::endl;
@@ -55,22 +71,17 @@ void server::initializeTls() try {
         std::cout << "[Server] Could not set verify callback function (" << error.message() << ")" << std::endl;
         throw std::runtime_error("TLS Config error");
     }
-
-    _sslContext.load_verify_file("../certs/ca.pem", error);
-    if (error) {
-        std::cout << "[Server] Could not load CA cert file (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
-    }
 } catch (...) {
     std::cout << "[Server] Tls initialization failed" << std::endl;
     throw std::runtime_error("TLS Config error");
 }
 
 void server::accept() {
+    std::cout << "[Server] Waiting for connections..." << std::endl;
     _acceptor.async_accept(
         [this](const boost::system::error_code& error, boost::asio::ip::tcp::socket socket) {
             if (!error) {
-                std::cout << "Client connected (" << socket.remote_endpoint() << ")" << std::endl;
+                std::cout << "[Server] Client connected (" << socket.remote_endpoint() << ")" << std::endl;
                 //socket.non_blocking(true); // NOTE: If set here, handshake fails with "resource temporarly unavailable"
                 std::make_shared<connection>(std::move(socket), _sslContext)->start();
             }
