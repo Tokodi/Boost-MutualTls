@@ -1,6 +1,6 @@
 # BoostTls
 
-Simple example of server-client communication with TLS, implemented in C++ with Boost::Asio::Ssl.
+Simple example of server-client communication with mutual TLS, implemented in C++ with Boost::Asio::Ssl.
 
 ## Build
 
