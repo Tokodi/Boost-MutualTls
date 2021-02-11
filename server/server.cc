@@ -32,48 +32,41 @@ void server::initializeTls() try {
 
     _sslContext.set_options(boost::asio::ssl::context::default_workarounds, error);
     if (error) {
-        std::cout << "[Server] Could not set ssl context options (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set SSL context options (" + error.message() + ")");
     }
 
     _sslContext.set_password_callback(std::bind(&server::getPassword, this), error);
     if (error) {
-        std::cout << "[Server] Could not set password callback (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set password callback (" + error.message() + ")");
     }
 
     _sslContext.use_certificate_file("../certs/server.crt", boost::asio::ssl::context::pem, error);
     if (error) {
-        std::cout << "[Server] Could not set certificate file (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set certificate file (" + error.message() + ")");
     }
 
     _sslContext.use_private_key_file("../certs/server.key", boost::asio::ssl::context::pem, error);
     if (error) {
-        std::cout << "[Server] Could not set private key (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set private key file (" + error.message() + ")");
     }
 
     _sslContext.load_verify_file("../certs/ca.pem", error);
     if (error) {
-        std::cout << "[Server] Could not load CA cert file (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not load CA certificate file (" + error.message() + ")");
     }
 
     _sslContext.set_verify_mode(boost::asio::ssl::verify_peer | boost::asio::ssl::verify_fail_if_no_peer_cert, error);
     if (error) {
-        std::cout << "[Server] Could not set verify mode (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set verify mode (" + error.message() + ")");
     }
 
     _sslContext.set_verify_callback(std::bind(&server::verifyCertificate, this, std::placeholders::_1, std::placeholders::_2), error);
     if (error) {
-        std::cout << "[Server] Could not set verify callback function (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set verify callback function (" + error.message() + ")");
     }
-} catch (...) {
-    std::cout << "[Server] Tls initialization failed" << std::endl;
-    throw std::runtime_error("TLS Config error");
+} catch (const std::runtime_error& ex) {
+    std::cout << "[Server] TLS initialization error: " << ex.what() << std::endl;
+    throw std::runtime_error("TLS initialization error");
 }
 
 void server::accept() {

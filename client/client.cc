@@ -1,5 +1,6 @@
 #include "client.h"
 
+#include <exception>
 #include <iostream>
 
 client::client(const std::string remoteIp, const std::uint16_t remotePort)
@@ -35,74 +36,65 @@ void client::initializeTls() try {
 
     _sslContext.set_options(boost::asio::ssl::context::default_workarounds, error);
     if (error) {
-        std::cout << "[Client] Could not set ssl context options (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set SSL context options (" + error.message() + ")");
     }
 
     _sslContext.set_password_callback(std::bind(&client::getPassword, this), error);
     if (error) {
-        std::cout << "[Client] Could not set password callback (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set password callback (" + error.message() + ")");
     }
 
     _sslContext.use_certificate_file("../certs/client.crt", boost::asio::ssl::context::pem, error);
     if (error) {
-        std::cout << "[Client] Could not set certificate file (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set certificate file (" + error.message() + ")");
     }
 
     _sslContext.use_private_key_file("../certs/client.key", boost::asio::ssl::context::pem, error);
     if (error) {
-        std::cout << "[Client] Could not set private key (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set private key file (" + error.message() + ")");
     }
 
     _sslContext.load_verify_file("../certs/ca.pem", error);
     if (error) {
-        std::cout << "[Client] Could not load CA cert file (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not load CA certificate file (" + error.message() + ")");
     }
 
     // NOTE: In client mode (sslContext(tlsv12_client)) verify_fail_if_no_peer_cert flag is ignored
     // https://www.openssl.org/docs/man1.0.2/man3/SSL_CTX_set_verify.html
     _sslContext.set_verify_mode(boost::asio::ssl::verify_peer, error);
     if (error) {
-        std::cout << "[Client] Could not set verify mode (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set verify mode (" + error.message() + ")");
     }
 
     _sslContext.set_verify_callback(std::bind(&client::verifyCertificate, this, std::placeholders::_1, std::placeholders::_2), error);
     if (error) {
-        std::cout << "[Client] Could not set verify callback function (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("TLS Config error");
+        throw std::runtime_error("Could not set verify callback function (" + error.message() + ")");
     }
 
     // NOTE: Initialize socket after sslContext is initialized so the settings are applied (does not work otherwise)
     _sslSocketPtr = std::make_unique<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>>(_ioContext, _sslContext);
-} catch (...) {
-    std::cout << "[Client] Tls initialization failed" << std::endl;
-    throw std::runtime_error("TLS Config error");
+} catch (const std::runtime_error& ex) {
+    std::cout << "[Client] TLS initialization error: " << ex.what() << std::endl;
+    throw std::runtime_error("TLS initialization error");
 }
 
 void client::connect() try {
     boost::system::error_code error;
     _sslSocketPtr->lowest_layer().connect(_remoteEndpoint, error);
     if (error) {
-        std::cout << "[Client] Could not connect to remote endpoint (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("Connect error");
+        throw std::runtime_error("Could not connect to remote endpoint (" + error.message() + ")");
     }
 
     _sslSocketPtr->handshake(boost::asio::ssl::stream_base::client, error);
     if (error) {
-        std::cout << "[Client] Handshake failed with server (" << error.message() << ")" << std::endl;
-        throw std::runtime_error("Connect error");
+        throw std::runtime_error("TLS handshake failure (" + error.message() + ")");
     } else {
         std::cout << "[Client] Successful handshake with server" << std::endl;
     }
 
     std::cout << "[Client] Successfully connected to server" << std::endl;
-} catch (...) {
-    std::cout << "[Client] Could not connect to server" << std::endl;
+} catch (const std::runtime_error& ex) {
+    std::cout << "[Client] Could not connect to server: " << ex.what() << std::endl;
     throw std::runtime_error("Connect error");
 }
 
