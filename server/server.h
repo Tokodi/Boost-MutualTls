@@ -17,7 +17,7 @@ class server {
     void accept();
 
     std::string getPassword() const;
-    bool verifyCertificate(bool preverified, boost::asio::ssl::verify_context& ctx);
+    bool certVerifyCB(bool preverified, boost::asio::ssl::verify_context& ctx);
 
   private:
     std::uint16_t _port;

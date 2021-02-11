@@ -66,7 +66,7 @@ void client::initializeTls() try {
         throw std::runtime_error("Could not set verify mode (" + error.message() + ")");
     }
 
-    _sslContext.set_verify_callback(std::bind(&client::verifyCertificate, this, std::placeholders::_1, std::placeholders::_2), error);
+    _sslContext.set_verify_callback(std::bind(&client::certVerifyCB, this, std::placeholders::_1, std::placeholders::_2), error);
     if (error) {
         throw std::runtime_error("Could not set verify callback function (" + error.message() + ")");
     }
@@ -102,7 +102,7 @@ std::string client::getPassword() const {
     return "clientKeyPass";
 }
 
-bool client::verifyCertificate(bool preverified, boost::asio::ssl::verify_context& ctx) {
+bool client::certVerifyCB(bool preverified, boost::asio::ssl::verify_context& ctx) {
     // The verify callback can be used to check whether the certificate that is
     // being presented is valid for the peer. For example, RFC 2818 describes
     // the steps involved in doing this for HTTPS. Consult the OpenSSL

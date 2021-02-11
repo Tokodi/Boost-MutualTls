@@ -17,7 +17,7 @@ class client {
     void connect();
 
     std::string getPassword() const;
-    bool verifyCertificate(bool preverified, boost::asio::ssl::verify_context& ctx);
+    bool certVerifyCB(bool preverified, boost::asio::ssl::verify_context& ctx);
 
   private:
     static constexpr std::uint32_t MAX_SUBJECT_SIZE = 256;
